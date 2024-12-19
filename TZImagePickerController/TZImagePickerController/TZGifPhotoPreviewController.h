@@ -11,6 +11,9 @@
 @class TZAssetModel;
 @interface TZGifPhotoPreviewController : UIViewController
 
+/// 是否只显示GIF图
+@property (nonatomic, assign) BOOL isShowOnlyGif;
+
 @property (nonatomic, strong) TZAssetModel *model;
 
 @end

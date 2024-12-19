@@ -11,7 +11,7 @@
 
 @implementation TZAssetModel
 
-+ (instancetype)modelWithAsset:(PHAsset *)asset type:(TZAssetModelMediaType)type{
++ (instancetype)modelWithAsset:(PHAsset *)asset type:(TZAssetModelMediaType)type {
     TZAssetModel *model = [[TZAssetModel alloc] init];
     model.asset = asset;
     model.isSelected = NO;

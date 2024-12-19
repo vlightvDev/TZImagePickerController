@@ -9,10 +9,10 @@
 
 /*
  经过测试，比起xib的方式，把TZAssetCell改用纯代码的方式来写，滑动帧数明显提高了（约提高10帧左右）
- 
+
  最初发现这个问题并修复的是@小鱼周凌宇同学，她的博客地址: http://zhoulingyu.com/
  表示感谢~
- 
+
  原来xib确实会导致性能问题啊...大家也要注意了...
  */
 
@@ -44,6 +44,7 @@
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount delegate:(id<TZImagePickerControllerDelegate>)delegate;
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate;
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate pushPhotoPickerVc:(BOOL)pushPhotoPickerVc;
+- (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate pushPhotoPickerVc:(BOOL)pushPhotoPickerVc showOnlyGif:(BOOL)isShowOnlyGif showWarningView:(BOOL)isShowWarningView;
 /// This init method just for previewing photos / 用这个初始化方法以预览图片
 - (instancetype)initWithSelectedAssets:(NSMutableArray *)selectedAssets selectedPhotos:(NSMutableArray *)selectedPhotos index:(NSInteger)index;
 /// This init method for crop photo / 用这个初始化方法以裁剪图片
@@ -52,6 +53,19 @@
 #pragma mark -
 /// Default is 9 / 默认最大可选9张图片
 @property (nonatomic, assign) NSInteger maxImagesCount;
+
+/// Default is 0 / 当 allowPickingVideo 为YES 时，可以设置选择视频的最大数量
+@property (nonatomic, assign) NSInteger maxVideoCount;
+
+/// Default is NO / 当 allowPickingVideo 为YES 时，设置 视频和照片不可以可以同时选中 是否互斥
+@property (nonatomic, assign) BOOL imagesVideoExclusion;
+
+/// Default is 10分钟 / 当 allowPickingVideo 为YES 时，可以设置选择视频单个时长
+@property (nonatomic, assign) NSInteger maxVideoDuration;
+/// Default is 1g / 当 allowPickingVideo 为YES 时，可以设置选择视频单个大小
+@property (nonatomic, assign) NSInteger maxVideoSize;
+/// Default is NO / 当
+@property (nonatomic, assign) BOOL isSelectAudio;
 
 /// The minimum count photos user must pick, Default is 0
 /// 最小照片必选张数,默认是0
@@ -84,6 +98,9 @@
 /// 默认为YES，如果设置为NO,原图按钮将隐藏，用户不能选择发送原图
 @property (nonatomic, assign) BOOL allowPickingOriginalPhoto;
 
+/// 默认为YES，如果设置为NO,将不显示警告
+@property (nonatomic, assign) BOOL showWarningView;
+
 /// Default is YES, if set NO, user can't picking video.
 /// 默认为YES，如果设置为NO,用户将不能选择视频
 @property (nonatomic, assign) BOOL allowPickingVideo;
@@ -110,6 +127,9 @@
 /// Default is NO, if set YES, user can picking gif image. When NO, gif will be treated as a regular image. If want not displayed, please refer to isAssetCanBeDisplayed
 /// 默认为NO，如果设置为YES，用户可以选择gif图片。为NO时gif会被当成普通图片，若要不显示，请参考isAssetCanBeDisplayed
 @property (nonatomic, assign) BOOL allowPickingGif;
+
+/// 是否只显示GIF图
+@property (nonatomic, assign) BOOL isShowOnlyGif;
 
 /// Default is YES, if set NO, user can't picking image.
 /// 默认为YES，如果设置为NO,用户将不能选择发送图片
@@ -198,6 +218,8 @@
 @property (nonatomic, assign) CGRect cropRectPortrait;   ///< 裁剪框的尺寸(竖屏)
 @property (nonatomic, assign) CGRect cropRectLandscape;  ///< 裁剪框的尺寸(横屏)
 @property (nonatomic, assign) BOOL needCircleCrop;       ///< 需要圆形裁剪框
+@property (nonatomic, assign) BOOL needExpression;       ///< 需要添加表情
+@property (nonatomic, assign) BOOL isChangeHallCover;    ///< 修改厅封面
 @property (nonatomic, assign) NSInteger circleCropRadius;  ///< 圆形裁剪框半径大小
 @property (nonatomic, copy) void (^cropViewSettingBlock)(UIView *cropView);     ///< 自定义裁剪框的其他属性
 @property (nonatomic, copy) void (^navLeftBarButtonSettingBlock)(UIButton *leftButton);     ///< 自定义返回按钮样式及其属性
@@ -354,6 +376,8 @@
 @interface TZAlbumPickerController : UIViewController
 @property (nonatomic, assign) NSInteger columnNumber;
 @property (assign, nonatomic) BOOL isFirstAppear;
+/// 是否只显示GIF图
+@property (nonatomic, assign) BOOL isShowOnlyGif;
 - (void)configTableView;
 @end
 

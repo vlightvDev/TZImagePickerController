@@ -18,14 +18,14 @@
     self = [super init];
     if (self) {
         self.backgroundColor = [UIColor clearColor];
-        
+
         _progressLayer = [CAShapeLayer layer];
         _progressLayer.fillColor = [[UIColor clearColor] CGColor];
         _progressLayer.strokeColor = [[UIColor whiteColor] CGColor];
         _progressLayer.opacity = 1;
         _progressLayer.lineCap = kCALineCapRound;
         _progressLayer.lineWidth = 5;
-        
+
         [_progressLayer setShadowColor:[UIColor blackColor].CGColor];
         [_progressLayer setShadowOffset:CGSizeMake(1, 1)];
         [_progressLayer setShadowOpacity:0.5];
@@ -42,7 +42,7 @@
     _progressLayer.frame = self.bounds;
     UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:center radius:radius startAngle:startA endAngle:endA clockwise:YES];
     _progressLayer.path =[path CGPath];
-    
+
     [_progressLayer removeFromSuperlayer];
     [self.layer addSublayer:_progressLayer];
 }

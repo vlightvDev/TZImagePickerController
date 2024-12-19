@@ -14,13 +14,16 @@
 #import "TZImageCropManager.h"
 #import <MediaPlayer/MediaPlayer.h>
 #import "TZImagePickerController.h"
+#ifdef HAVE_FDFullscreenPopGesture_H
+#import "DianBo-Swift.h"
+#endif
 
 @implementation TZAssetPreviewCell
 
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        self.backgroundColor = [UIColor blackColor];
+        self.backgroundColor = [UIColor colorWithRed:(17/255.0) green:(15/255.0) blue:(28/255.0) alpha:1.0];
         [self configSubviews];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(photoPreviewCollectionViewDidScroll) name:@"photoPreviewCollectionViewDidScroll" object:nil];
     }
@@ -28,13 +31,13 @@
 }
 
 - (void)configSubviews {
-    
+
 }
 
 #pragma mark - Notification
 
 - (void)photoPreviewCollectionViewDidScroll {
-    
+
 }
 
 - (void)dealloc {
@@ -49,12 +52,12 @@
 - (void)configSubviews {
     self.previewView = [[TZPhotoPreviewView alloc] initWithFrame:CGRectZero];
     __weak typeof(self) weakSelf = self;
-    [self.previewView setSingleTapGestureBlock:^{
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (strongSelf.singleTapGestureBlock) {
-            strongSelf.singleTapGestureBlock();
-        }
-    }];
+//    [self.previewView setSingleTapGestureBlock:^{
+//        __strong typeof(weakSelf) strongSelf = weakSelf;
+//        if (strongSelf.singleTapGestureBlock) {
+//            strongSelf.singleTapGestureBlock();
+//        }
+//    }];
     [self.previewView setImageProgressUpdateBlock:^(double progress) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (strongSelf.imageProgressUpdateBlock) {
@@ -105,9 +108,10 @@
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
+        self.backgroundColor = [UIColor colorWithRed:(17/255.0) green:(15/255.0) blue:(28/255.0) alpha:1.0];
         _scrollView = [[UIScrollView alloc] init];
         _scrollView.bouncesZoom = YES;
-        _scrollView.maximumZoomScale = 4;
+        _scrollView.maximumZoomScale = 2.5;
         _scrollView.minimumZoomScale = 1.0;
         _scrollView.multipleTouchEnabled = YES;
         _scrollView.delegate = self;
@@ -122,12 +126,12 @@
             _scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
         }
         [self addSubview:_scrollView];
-        
+
         _imageContainerView = [[UIView alloc] init];
         _imageContainerView.clipsToBounds = YES;
         _imageContainerView.contentMode = UIViewContentModeScaleAspectFill;
         [_scrollView addSubview:_imageContainerView];
-        
+
         _imageView = [[UIImageView alloc] init];
         _imageView.backgroundColor = [UIColor colorWithWhite:1.000 alpha:0.500];
         _imageView.contentMode = UIViewContentModeScaleAspectFill;
@@ -144,14 +148,14 @@
         _iCloudErrorLabel.text = [NSBundle tz_localizedStringForKey:@"iCloud sync failed"];
         _iCloudErrorLabel.hidden = YES;
         [self addSubview:_iCloudErrorLabel];
-        
+    
         UITapGestureRecognizer *tap1 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTap:)];
         [self addGestureRecognizer:tap1];
         UITapGestureRecognizer *tap2 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTap:)];
         tap2.numberOfTapsRequired = 2;
         [tap1 requireGestureRecognizerToFail:tap2];
         [self addGestureRecognizer:tap2];
-        
+
         [self configProgressView];
     }
     return self;
@@ -188,7 +192,7 @@
                     if (self.iCloudSyncFailedHandle) {
                         self.iCloudSyncFailedHandle(model.asset, iCloudSyncFailed);
                     }
-                    
+                
                     self.progressView.progress = progress;
                     if (progress >= 1) {
                         self.progressView.hidden = YES;
@@ -221,7 +225,7 @@
     if (_asset && self.imageRequestID) {
         [[PHImageManager defaultManager] cancelImageRequest:self.imageRequestID];
     }
-    
+
     _asset = asset;
     self.imageRequestID = [[TZImageManager manager] getPhotoWithAsset:asset completion:^(UIImage *photo, NSDictionary *info, BOOL isDegraded) {
         BOOL iCloudSyncFailed = !photo && [TZCommonTools isICloudSyncError:info[PHImageErrorKey]];
@@ -237,14 +241,18 @@
         [self resizeSubviews];
         if (self.imageView.tz_height && self.allowCrop) {
             CGFloat scale = MAX(self.cropRect.size.width / self.imageView.tz_width, self.cropRect.size.height / self.imageView.tz_height);
-            if (self.scaleAspectFillCrop && scale > 1) { // 如果设置图片缩放裁剪并且图片需要缩放
-                CGFloat multiple = self.scrollView.maximumZoomScale / self.scrollView.minimumZoomScale;
-                self.scrollView.minimumZoomScale = scale;
-                self.scrollView.maximumZoomScale = scale * MAX(multiple, 2);
-                [self.scrollView setZoomScale:scale animated:YES];
+            if (self.scaleAspectFillCrop) { // 如果设置图片缩放裁剪并且图片需要缩放
+                if (scale > 1) {
+                    CGFloat multiple = self.scrollView.maximumZoomScale / self.scrollView.minimumZoomScale;
+                    self.scrollView.minimumZoomScale = scale;
+                    self.scrollView.maximumZoomScale = scale * MAX(multiple, 2);
+                    [self.scrollView setZoomScale:scale animated:YES];
+                } else {
+                    self.scrollView.minimumZoomScale = scale;
+                }
             }
         }
-        
+    
         self->_progressView.hidden = YES;
         if (self.imageProgressUpdateBlock) {
             self.imageProgressUpdateBlock(1);
@@ -261,13 +269,13 @@
         if (self.imageProgressUpdateBlock && progress < 1) {
             self.imageProgressUpdateBlock(progress);
         }
-        
+
         if (progress >= 1) {
             self->_progressView.hidden = YES;
             self.imageRequestID = 0;
         }
     } networkAccessAllowed:YES];
-    
+
     [self configMaximumZoomScale];
 }
 
@@ -279,7 +287,7 @@
 - (void)resizeSubviews {
     _imageContainerView.tz_origin = CGPointZero;
     _imageContainerView.tz_width = self.scrollView.tz_width;
-    
+
     UIImage *image = _imageView.image;
     if (image.size.height / image.size.width > self.tz_height / self.scrollView.tz_width) {
         CGFloat width = image.size.width / image.size.height * self.scrollView.tz_height;
@@ -304,13 +312,13 @@
     [_scrollView scrollRectToVisible:self.bounds animated:NO];
     _scrollView.alwaysBounceVertical = _imageContainerView.tz_height <= self.tz_height ? NO : YES;
     _imageView.frame = _imageContainerView.bounds;
-    
+
     [self refreshScrollViewContentSize];
 }
 
 - (void)configMaximumZoomScale {
-    _scrollView.maximumZoomScale = _allowCrop ? 6.0 : 4.0;
-    
+    _scrollView.maximumZoomScale = _allowCrop ? 4.0 : 2.5;
+
     if ([self.asset isKindOfClass:[PHAsset class]]) {
         PHAsset *phAsset = (PHAsset *)self.asset;
         CGFloat aspectRatio = phAsset.pixelWidth / (CGFloat)phAsset.pixelHeight;
@@ -333,7 +341,7 @@
         _scrollView.alwaysBounceVertical = YES;
         // 2.让scrollView新增滑动区域（裁剪框左上角的图片部分）
         if (contentHeightAdd > 0 || contentWidthAdd > 0) {
-            _scrollView.contentInset = UIEdgeInsetsMake(MAX(contentHeightAdd, 0), MAX(contentWidthAdd, 0), 0, 0);
+            _scrollView.contentInset = UIEdgeInsetsMake(contentHeightAdd, contentWidthAdd, 0, 0);
         } else {
             _scrollView.contentInset = UIEdgeInsetsZero;
         }
@@ -347,6 +355,7 @@
     CGFloat progressX = (self.tz_width - progressWH) / 2;
     CGFloat progressY = (self.tz_height - progressWH) / 2;
     _progressView.frame = CGRectMake(progressX, progressY, progressWH, progressWH);
+
     [self recoverSubviews];
     _iCloudErrorIcon.frame = CGRectMake(20, [TZCommonTools tz_statusBarHeight] + 44 + 10, 28, 28);
     _iCloudErrorLabel.frame = CGRectMake(53, [TZCommonTools tz_statusBarHeight] + 44 + 10, self.tz_width - 63, 28);
@@ -368,9 +377,9 @@
 }
 
 - (void)singleTap:(UITapGestureRecognizer *)tap {
-    if (self.singleTapGestureBlock) {
-        self.singleTapGestureBlock();
-    }
+//    if (self.singleTapGestureBlock) {
+//        self.singleTapGestureBlock();
+//    }
 }
 
 #pragma mark - UIScrollViewDelegate
@@ -447,7 +456,7 @@
         [_player pause];
         _player = nil;
     }
-    
+
     if (self.model && self.model.asset) {
         [[TZImageManager manager] getPhotoWithAsset:self.model.asset completion:^(UIImage *photo, NSDictionary *info, BOOL isDegraded) {
             BOOL iCloudSyncFailed = !photo && [TZCommonTools isICloudSyncError:info[PHImageErrorKey]];
@@ -512,6 +521,13 @@
 #pragma mark - Click Event
 
 - (void)playButtonClick {
+#ifdef HAVE_FDFullscreenPopGesture_H
+    RoomManager.shared.roomMute = YES;
+    [WGAudioTool setAudioSessionWithConfig:^(WGAudioSessionConfig * _Nonnull config) {
+        config.active = YES;
+    }];
+#endif
+
     CMTime currentTime = _player.currentItem.currentTime;
     CMTime durationTime = _player.currentItem.duration;
     if (_player.rate == 0.0f) {
@@ -529,6 +545,9 @@
 }
 
 - (void)pausePlayerAndShowNaviBar {
+#ifdef HAVE_FDFullscreenPopGesture_H
+    RoomManager.shared.roomMute = NO;
+#endif
     [_player pause];
     [_playButton setImage:[UIImage tz_imageNamedFromMyBundle:@"MMVideoPreviewPlay"] forState:UIControlStateNormal];
     if (self.singleTapGestureBlock) {

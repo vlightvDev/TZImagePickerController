@@ -14,6 +14,9 @@
 #import "TZImagePickerController.h"
 #import "TZPhotoPreviewController.h"
 #import "TZVideoCropController.h"
+#ifdef HAVE_FDFullscreenPopGesture_H
+#import "DianBo-Swift.h"
+#endif
 
 @interface TZVideoPlayerController () {
     AVPlayer *_player;
@@ -28,7 +31,7 @@
     UIButton *_doneButton;
     UIButton *_editButton;
     UIProgressView *_progress;
-    
+
     UIStatusBarStyle _originStatusBarStyle;
 }
 @property (assign, nonatomic) BOOL needShowStatusBar;
@@ -118,9 +121,9 @@
     _toolBar = [[UIView alloc] initWithFrame:CGRectZero];
     CGFloat rgb = 34 / 255.0;
     _toolBar.backgroundColor = [UIColor colorWithRed:rgb green:rgb blue:rgb alpha:0.7];
-    
+
     _doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    _doneButton.titleLabel.font = [UIFont systemFontOfSize:16];
+    _doneButton.titleLabel.font = [UIFont systemFontOfSize:13];
     if (!_cover) {
         _doneButton.enabled = NO;
     }
@@ -136,7 +139,7 @@
     [_doneButton setTitleColor:tzImagePickerVc.oKButtonTitleColorDisabled forState:UIControlStateDisabled];
     [_toolBar addSubview:_doneButton];
     [self.view addSubview:_toolBar];
-    
+
     if (tzImagePickerVc && tzImagePickerVc.allowEditVideo && roundf(self.model.asset.duration) > 1) {
         _editButton = [UIButton buttonWithType:UIButtonTypeCustom];
         _editButton.titleLabel.font = [UIFont systemFontOfSize:16];
@@ -149,7 +152,7 @@
         [_editButton setTitleColor:tzImagePickerVc.oKButtonTitleColorDisabled forState:UIControlStateDisabled];
         [_toolBar addSubview:_editButton];
     }
-    
+
     if (tzImagePickerVc.videoPreviewPageUIConfigBlock) {
         tzImagePickerVc.videoPreviewPageUIConfigBlock(_playButton, _toolBar, _editButton, _doneButton);
     }
@@ -167,16 +170,20 @@
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
+
     TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
-    
     BOOL isFullScreen = self.view.tz_height == [UIScreen mainScreen].bounds.size.height;
     CGFloat statusBarHeight = isFullScreen ? [TZCommonTools tz_statusBarHeight] : 0;
     CGFloat statusBarAndNaviBarHeight = statusBarHeight + self.navigationController.navigationBar.tz_height;
     _playerLayer.frame = self.view.bounds;
+
     CGFloat toolBarHeight = 44 + [TZCommonTools tz_safeAreaInsets].bottom;
     _toolBar.frame = CGRectMake(0, self.view.tz_height - toolBarHeight, self.view.tz_width, toolBarHeight);
+
     [_doneButton sizeToFit];
-    _doneButton.frame = CGRectMake(self.view.tz_width - _doneButton.tz_width - 12, 0, MAX(44, _doneButton.tz_width), 44);
+    _doneButton.frame = CGRectMake(self.view.tz_width - 97, 13, 82, 32);
+    _playButton.frame = CGRectMake(0, statusBarAndNaviBarHeight, self.view.tz_width, self.view.tz_height - statusBarAndNaviBarHeight - toolBarHeight);
+    
     _playButton.frame = CGRectMake(0, statusBarAndNaviBarHeight, self.view.tz_width, self.view.tz_height - statusBarAndNaviBarHeight - toolBarHeight);
     if (tzImagePickerVc.allowEditVideo) {
         _editButton.frame = CGRectMake(12, 0, 44, 44);
@@ -191,6 +198,12 @@
 #pragma mark - Click Event
 
 - (void)playButtonClick {
+#ifdef HAVE_FDFullscreenPopGesture_H
+    RoomManager.shared.roomMute = YES;
+    [WGAudioTool setAudioSessionWithConfig:^(WGAudioSessionConfig * _Nonnull config) {
+        config.active = YES;
+    }];
+#endif
     CMTime currentTime = _player.currentItem.currentTime;
     CMTime durationTime = _player.currentItem.duration;
     if (_player.rate == 0.0f) {
@@ -285,6 +298,9 @@
 #pragma mark - Notification Method
 
 - (void)pausePlayerAndShowNaviBar {
+#ifdef HAVE_FDFullscreenPopGesture_H
+    RoomManager.shared.roomMute = NO;
+#endif
     [_player pause];
     _toolBar.hidden = NO;
     [self.navigationController setNavigationBarHidden:NO];
