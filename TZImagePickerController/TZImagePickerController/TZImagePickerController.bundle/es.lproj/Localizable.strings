@@ -24,3 +24,5 @@
 "Allow %@ to access your album in \"Settings -> Privacy -> Photos\"" = "Permita que %@ acceda a su galería en \"Ajustes > Privacidad > Fotografías\"";
 "Please allow %@ to access your camera in \"Settings -> Privacy -> Camera\"" = "Permita que %@ acceda a su cámara en \"Ajustes > Privacidad > Cámara\"";
 "Selected for %ld seconds" = "Seleccionado para %ld segundos";
+"Please allow %@ to access your camera in \"Settings -> Privacy -> Camera\"" = "Permita que %@ acceda a su cámara en \"Ajustes > Privacidad > Cámara\"";
+"Selected for %ld seconds" = "Seleccionado para %ld segundos";
