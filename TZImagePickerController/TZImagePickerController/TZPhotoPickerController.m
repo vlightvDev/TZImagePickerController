@@ -831,10 +831,11 @@ static CGFloat itemMargin = 7.5;
     // the cell lead to add more photo / 去添加更多照片的cell
     if (indexPath.item == [self getAddMorePhotoCellIndex]) {
         TZAssetAddMoreCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"TZAssetAddMoreCell" forIndexPath:indexPath];
+
         cell.imageView.image = tzImagePickerVc.addMorePhotoImage;
         cell.tipLabel.text = [NSBundle tz_localizedStringForKey:@"Add more accessible photos"];
-        cell.imageView.contentMode = UIViewContentModeScaleAspectFit;
-        cell.imageView.backgroundColor = [UIColor colorWithWhite:1.000 alpha:0.500];
+        cell.imageView.contentMode = UIViewContentModeCenter;
+
         return cell;
     }
     // the cell lead to take a picture / 去拍照的cell
@@ -843,8 +844,6 @@ static CGFloat itemMargin = 7.5;
         cell.imageView.image = tzImagePickerVc.takePictureImage;
         if ([tzImagePickerVc.takePictureImageName isEqualToString:@"takePicture80"]) {
             cell.imageView.contentMode = UIViewContentModeCenter;
-            CGFloat rgb = 223 / 255.0;
-            cell.imageView.backgroundColor = [UIColor colorWithRed:rgb green:rgb blue:rgb alpha:1.0];
         } else {
             cell.imageView.backgroundColor = [UIColor colorWithWhite:1.000 alpha:0.500];
         }
