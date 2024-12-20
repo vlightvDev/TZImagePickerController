@@ -35,6 +35,12 @@
 #define CURRENT_SYSTEM_VERSION         [[UIDevice currentDevice] systemVersion]
 #define SYSTEM_VERSION_GREATER_THAN_15 ([CURRENT_SYSTEM_VERSION floatValue] >= 15.0)
 
+#if __has_include("UINavigationController+FDFullscreenPopGesture.h")
+#define HAVE_FDFullscreenPopGesture_H   1
+#else
+#undef HAVE_FDFullscreenPopGesture_H
+#endif
+
 @class TZAlbumCell, TZAssetCell;
 @protocol TZImagePickerControllerDelegate;
 @interface TZImagePickerController : UINavigationController

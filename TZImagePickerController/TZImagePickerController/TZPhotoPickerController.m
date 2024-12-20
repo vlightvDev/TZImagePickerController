@@ -19,15 +19,14 @@
 #import "TZImageRequestOperation.h"
 #import "TZAuthLimitedFooterTipView.h"
 #import <PhotosUI/PhotosUI.h>
+
 #import "WGImagePickerWarningView.h"
 #import "WGPhotoPickerTableView.h"
 #ifdef HAVE_FDFullscreenPopGesture_H
 #import "UINavigationController+FDFullscreenPopGesture.h"
 #import "CustomHUD.h"
 #import "Bugly/Bugly.h"
-#endif
-#ifdef TZ_HAVE_LOCATION_CODE
-#import "TZLocationManager.h"
+@import WGFoundation;
 #endif
 
 @interface TZPhotoPickerController ()<UICollectionViewDataSource, UICollectionViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, PHPhotoLibraryChangeObserver> {
